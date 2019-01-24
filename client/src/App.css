@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css?family=Righteous');
+@import url('https://fonts.googleapis.com/css?family=Poppins');
+
+.App {
+  text-align: center;
+}
+
+.lyrHolder {
+  background: #ffffff;
+  text-align: left;
+  width: 800px;
+  border-radius: 20px;
+  padding: 20px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.btn-warning {
+  background: #ffd633;
+}
+
+.btn-primary {
+  background: #2c3e50;
+  border-color: #2c3e50;
+}
+
+.header {
+  font-family: 'Righteous', cursive;
+  color: #ffd633;
+  margin-top: 20px;
+}
+
+body {
+  background-color: #2c3e50;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.itemOnTheList {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 2px solid;
+  border-color: #2c3e50;
+  padding: 10px;
+}
+
+#songTitle, #songArtist {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+#nameGroupBox {
+  margin: auto; 
+  margin-left: -20px;
+  cursor: pointer; 
+}
+
+.loadingAnimation {
+  position: relative;
+}
+
+.loadingAnimation::after {
+  height: 150px;
+  width: 200px; 
+  content: url(./loader_gif.gif);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
