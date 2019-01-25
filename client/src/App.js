@@ -15,8 +15,10 @@ class App extends Component {
       APIhits: false,
       token: 'F9Si6uQtnYbJ6qGSVpyB2WYEW2Ppc8-nx18EeYYleeGw-MFw2HqXu8VeAr_hXOYT',
       lexicon: null,
-      songDuration: null,
-      animationFrame: null
+      songDuration: null, //do I actually need it?
+      animationFrame: null,
+      shower: {display: block},
+      songAnalysis: null
     }
     this.handleChange = this.handleChange.bind(this);
     this.handleClick = this.handleClick.bind(this);
@@ -124,6 +126,7 @@ class App extends Component {
   }
 
   handleAnimationOn(index) {
+    //TODO: test adding text instead of animation on the same classes
     const animatedFrame = document.getElementsByClassName("itemOnTheList");
     animatedFrame[index].classList.add('loadingAnimation');
     console.dir(animatedFrame[index]);
@@ -172,7 +175,10 @@ class App extends Component {
       console.log("Word hits " + wordHits);
       if (wordHits > 0) {
         let percentSad = wordHits / totalWords * 100;
-        console.log(Math.ceil(percentSad));
+        this.setState({
+          songAnalysis: {sadness: percentSad},
+          shower: {display: none}
+        })
       }
     }
     getLyrDensity();
@@ -221,7 +227,7 @@ class App extends Component {
       <button onClick = {this.handleClick} className = "btn btn-warning">
         Fetch
       </button>
-      <p /><h4 className = "lyrHolder">{textbox}</h4>
+      <p /><h4 className = "lyrHolder" style = {this.state.shower}>{textbox}</h4>
      </div>
     );
   }
