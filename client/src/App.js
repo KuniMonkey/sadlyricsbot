@@ -2,8 +2,10 @@ import React, { Component } from 'react';
 import './App.css';
 import { relative } from 'path';
 
-//TODO: Brainstorm your vision of the application. Stop jumping from one idea to another!
-//TODO: Work on the application design
+//TODO: ResetButton on list of emotions page
+//TODO: consider adding the weight of the lyrics for song (based on the this.state.songDuration)
+//TODO: Line 200
+//TODO: The title of the song on emotions page
 
 class App extends Component {
   constructor(props) {
@@ -15,14 +17,22 @@ class App extends Component {
       APIhits: false,
       token: 'F9Si6uQtnYbJ6qGSVpyB2WYEW2Ppc8-nx18EeYYleeGw-MFw2HqXu8VeAr_hXOYT',
       lexicon: null,
-      songDuration: null,
-      animationFrame: null
+      songDuration: null, //do I actually need it?
+      animationFrame: null,
+      shower: {display: "block"},
+      songAnalysis: {},
+      selectedEmotions: {
+        sadness :true,
+        anger: true,
+        fear: true
+      }
     }
     this.handleChange = this.handleChange.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.requestSong = this.requestSong.bind(this);
     this.getSong = this.getSong.bind(this);
     this.analyzeEmotion = this.analyzeEmotion.bind(this);
+    this.shortenSong = this.shortenSong.bind(this);
   }
 
   componentWillMount() {
@@ -67,6 +77,7 @@ class App extends Component {
 
     fetch(url).then(res => res.json()).then(response => 
       this.setState({
+        shower: {display: "block"},
         APIhits: response.response.hits
       }))
   }
@@ -77,7 +88,7 @@ class App extends Component {
     this.getSong(songWebPage);
     const LastAPI_URL = 'http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=5bed0a607f046f1ad1870be23ace9cf7&artist=' + encodeURIComponent(this.state.APIhits[songIndex].result.primary_artist.name) + '&track=' + encodeURIComponent(this.state.APIhits[songIndex].result.title)  + '&format=json';
     fetch(LastAPI_URL).then(res => res.json()).then(data => {
-      if (data.track.duration) {
+      if (data.hasOwnProperty('track')) {
         this.setState({
           songDuration: Number(data.track.duration) / 1000
         })
@@ -123,7 +134,9 @@ class App extends Component {
     });
   }
 
+  //TODO: Learn animation in react
   handleAnimationOn(index) {
+   //TODO: test adding text instead of animation on the same classes
     const animatedFrame = document.getElementsByClassName("itemOnTheList");
     animatedFrame[index].classList.add('loadingAnimation');
     console.dir(animatedFrame[index]);
@@ -134,48 +147,68 @@ class App extends Component {
     animatedFrame[index].classList.remove('loadingAnimation')
   }
 
-  analyzeEmotion() {
-    //TODO: Get the result with the stop words, work on the end algorithm
+  shortenSong() {
     let stopWords = [ "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "aren’t", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "could", "couldn't", "couldn’t", "did", "didn't","didn’t", "do", "don't", "don’t", "does", "doesn't", "doesn’t", "doing", "down", "during", "each", "few", "for", "from", "further", "had", "hadn't", "hadn’t", "has", "hasn't", "hasn’t", "have", "haven't", "haven’t", "having", "he", "he'd", "he’d", "he'll", "he’ll", "he's", "he’s", "her", "here", "here's", "here’s", "hers", "herself", "him", "himself", "his", "how", "how's", "how’s", "i", "i'd", "i’d", "i'll", "i’ll", "i'm", "i’m", "i've", "i’ve", "if", "in", "into", "is", "isn't", "isn’t", "it", "it's", "it’s", "its", "itself", "let's", "let’s", "me", "more", "most", "my", "myself", "nor", "of", "on", "once", "only", "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "she", "she'd", "she’d", "she'll", "she’ll", "she's", "she’s", "should", "shoudn't", "shoudn’t", "so", "some", "such", "than", "that", "that's", "that’s", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "there’s", "these", "they", "they'd", "they’d", "they'll", "they’ll", "they're", "they’re", "they've", "they’ve", "this", "those", "through", "to", "too", "under", "until", "up", "very", "was", "we", "we'd", "we’d", "we'll", "we’ll", "we're", "we’re", "we've", "we’ve", "were", "what", "what's", "what’s", "when", "when's", "when’s", "where", "where's", "where’s", "which", "while", "who", "who's", "who’s", "whom", "why", "why's", "why’s", "with", "would", "wouldn't", "wouldn’t", "you", "you'd", "you’d", "you'll", "you’ll", "you're", "you’re", "you've", "you’ve", "your", "yours", "yourself", "yourselves", "not", "no" ];
-    var getLyrDensity = () => {
-      let arrOfWords = this.state.analyzeString.toLowerCase().split(/\s+/).slice(1).filter(word => {
-        return stopWords.some(stopper => stopper === word) ? false : true;
-      });
-      console.log(arrOfWords);
+    let arrOfWords = this.state.analyzeString.toLowerCase().split(/\s+/).slice(1).filter(word => {
+      return stopWords.some(stopper => stopper === word) ? false : true;
+    });
+    return arrOfWords;
+  }
+
+  analyzeEmotion() {
+    let arrOfWords = this.shortenSong();
+    console.log("trying");
+    var getLyrDensity = (emotion) => {
       let totalWords = arrOfWords.length; 
       let wordHits = 0;
       for (let i = 0; i <= totalWords - 1; i++) {
         let currWord = arrOfWords[i];
         if (currWord[currWord.length - 1] === "s") {
           currWord = currWord.slice(0, -1);
-          if (this.state.lexicon.sadness.some(element => element === currWord)) {
+          if (this.state.lexicon[emotion].some(element => element === currWord)) {
             wordHits++;
             continue;
           }
         }
         if (currWord.slice(-2) === "ed") {
           currWord = currWord.slice(0, -1); //for word w/o "d"
-          if (this.state.lexicon.sadness.some(element => element === currWord)) {
+          if (this.state.lexicon[emotion].some(element => element === currWord)) {
             wordHits++;
             continue;
           }
           currWord = currWord.slice(0, -1); //for word w/o "ed"
-          if (this.state.lexicon.sadness.some(element => element === currWord)) {
+          if (this.state.lexicon[emotion].some(element => element === currWord)) {
             wordHits++;
             continue;
           }
         }
-        if (this.state.lexicon.sadness.some(element => element === currWord)) {
+        if (this.state.lexicon[emotion].some(element => element === currWord)) {
           wordHits++;
         }
       }
-      console.log("Word hits " + wordHits);
       if (wordHits > 0) {
-        let percentSad = wordHits / totalWords * 100;
-        console.log(Math.ceil(percentSad));
+        let percentEmo = Math.ceil(wordHits / totalWords * 100);
+        let obj = this.state.songAnalysis
+        obj[emotion] = percentEmo;
+        console.log(percentEmo);
+        this.setState({
+          songAnalysis: obj,
+          shower: {display: "none"}
+        })
       }
     }
-    getLyrDensity();
+
+    //TODO: separate putting in the values and creation of html to reduce the grand total to 100 and adjust to this value
+    let analyzedEmotions = [];
+    for (let key in this.state.selectedEmotions) {
+      if (this.state.selectedEmotions[key]) analyzedEmotions.push(key);
+    }
+    let html = "";
+    for (let i = 0; i <= analyzedEmotions.length - 1; i++) {
+      getLyrDensity(analyzedEmotions[i]);
+      html += "<div class = 'container'><div class = 'row'><div class = 'col-3' id = '" + analyzedEmotions[i] + "Table'>" + analyzedEmotions[i] + ":<br/>" + this.state.songAnalysis[analyzedEmotions[i]] + "%</div></div></div>"
+      document.getElementsByClassName("emotionTable")[0].innerHTML = html;
+    }
   }
 
   render() {
@@ -190,11 +223,11 @@ class App extends Component {
         textbox = <div>
           <button style = {{display: 'block', margin: '0 auto'}} onClick = {() => {this.analyzeEmotion()}} className = "btn btn-primary">Analyze the Sadness</button>
           <br />
-          {this.state.fetchedInfo.map((hit) => {
-            return hit.map((elem, index) => {
-              return <span key = {index} style = {{display: 'flex', justifyContent: 'center'}}>{elem}<br /></span>
+            {this.state.fetchedInfo.map((hit) => {
+              return hit.map((elem, index) => {
+                return <span key = {index} style = {{display: 'block', margin: '0 auto', textAlign: "center"}}>{elem}<br /></span>
+              })
             })
-          })
           }
         </div>
       }      
@@ -221,7 +254,8 @@ class App extends Component {
       <button onClick = {this.handleClick} className = "btn btn-warning">
         Fetch
       </button>
-      <p /><h4 className = "lyrHolder">{textbox}</h4>
+      <div className = "emotionTable"></div>
+      <p /><h4 className = "lyrHolder" style = {this.state.shower}>{textbox}</h4>
      </div>
     );
   }

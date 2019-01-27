@@ -51,6 +51,7 @@ body {
 }
 
 #nameGroupBox {
+  text-align: center;
   margin: auto; 
   margin-left: -20px;
   cursor: pointer; 
@@ -63,10 +64,38 @@ body {
 .loadingAnimation::after {
   height: 150px;
   width: 200px; 
-  content: url(./loader_gif.gif);
+  content: "...Loading";
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.emotionTable {
+  width: 800px;
+}
+
+#sadnessTable {
+  padding: 20px;
+  color: #ffd633;
+  border: 5px solid;
+  border-radius: 25px;
+  border-color: #ffd633; 
+}
+
+#angerTable {
+  padding: 20px;
+  color: #ff3333;
+  border: 5px solid;
+  border-radius: 25px;
+  border-color: #ff3333; 
+}
+
+#fearTable {
+  padding: 20px;
+  color: #9933ff;
+  border: 5px solid;
+  border-radius: 25px;
+  border-color: #9933ff; 
 }
 
 
