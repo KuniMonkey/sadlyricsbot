@@ -6,6 +6,9 @@ import { relative } from 'path';
 //TODO: consider adding the weight of the lyrics for song (based on the this.state.songDuration)
 //TODO: Line 200
 //TODO: The title of the song on emotions page
+//TODO: Make algorithm to handle 0 hits
+//TODO: create switch on the frontpage to select desired emotions
+//TODO: create a graph based on selected emotions and switch between graph and table view
 
 class App extends Component {
   constructor(props) {
@@ -38,7 +41,7 @@ class App extends Component {
   componentWillMount() {
     const myHeaders = new Headers({
       "Content-Type": "application/json",
-      Accept: "application/json"
+      "Accept": "application/json"
     });
     
     fetch('/api/getLexicon', {headers: myHeaders}).then(res => {
@@ -156,6 +159,7 @@ class App extends Component {
   }
 
   analyzeEmotion() {
+    //TODO: Find unicode range for english letters
     let arrOfWords = this.shortenSong();
     console.log("trying");
     var getLyrDensity = (emotion) => {
@@ -198,17 +202,37 @@ class App extends Component {
       }
     }
 
+    var calculateWieght = (emotion, total) => {
+      if (emotion === 0) {
+        return Math.round(1 / total * 100)
+      } else {
+        return Math.round(emotion / total * 100);
+      }
+    }
+
     //TODO: separate putting in the values and creation of html to reduce the grand total to 100 and adjust to this value
     let analyzedEmotions = [];
     for (let key in this.state.selectedEmotions) {
       if (this.state.selectedEmotions[key]) analyzedEmotions.push(key);
     }
-    let html = "";
+
     for (let i = 0; i <= analyzedEmotions.length - 1; i++) {
       getLyrDensity(analyzedEmotions[i]);
-      html += "<div class = 'container'><div class = 'row'><div class = 'col-3' id = '" + analyzedEmotions[i] + "Table'>" + analyzedEmotions[i] + ":<br/>" + this.state.songAnalysis[analyzedEmotions[i]] + "%</div></div></div>"
-      document.getElementsByClassName("emotionTable")[0].innerHTML = html;
     }
+
+    let overall = analyzedEmotions.reduce((prev, curr) => {
+      if (prev === "sadness") return this.state.songAnalysis[prev] + this.state.songAnalysis[curr];
+      return prev + this.state.songAnalysis[curr];
+    })
+
+    let html = "<div class = 'container'><div class = 'row' id = 'emotionContainer'>";
+    for (let i = 0; i <= analyzedEmotions.length - 1; i++) {
+      html += "<div class = 'col-3' id = '" + analyzedEmotions[i] + "Table'>" + analyzedEmotions[i] + ":<br/>" + calculateWieght(this.state.songAnalysis[analyzedEmotions[i]], overall) + "%</div>"
+      if (i === analyzedEmotions.length - 1) {
+        html += "</div></div>"
+      }
+    }
+    document.getElementsByClassName("emotionTable")[0].innerHTML = html;
   }
 
   render() {

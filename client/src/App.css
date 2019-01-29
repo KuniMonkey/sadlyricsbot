@@ -75,6 +75,8 @@ body {
 }
 
 #sadnessTable {
+  font-size: 20px;
+  margin: 10px;
   padding: 20px;
   color: #ffd633;
   border: 5px solid;
@@ -83,6 +85,8 @@ body {
 }
 
 #angerTable {
+  font-size: 20px;
+  margin: 10px;
   padding: 20px;
   color: #ff3333;
   border: 5px solid;
@@ -91,6 +95,8 @@ body {
 }
 
 #fearTable {
+  font-size: 20px;
+  margin: 10px;
   padding: 20px;
   color: #9933ff;
   border: 5px solid;
@@ -98,4 +104,6 @@ body {
   border-color: #9933ff; 
 }
 
-
+#emotionContainer {
+  justify-content: center;
+}
