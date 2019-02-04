@@ -4,10 +4,8 @@ import { relative } from 'path';
 
 //TODO: ResetButton on list of emotions page
 //TODO: consider adding the weight of the lyrics for song (based on the this.state.songDuration)
-//TODO: Line 200
 //TODO: The title of the song on emotions page
-//TODO: Make algorithm to handle 0 hits
-//TODO: create switch on the frontpage to select desired emotions
+//TODO: create switch on the frontpage to select all emotions + buttons?
 //TODO: create a graph based on selected emotions and switch between graph and table view
 
 class App extends Component {
@@ -83,6 +81,7 @@ class App extends Component {
         shower: {display: "block"},
         APIhits: response.response.hits
       }))
+    document.getElementsByClassName("emotionTable")[0].innerHTML = "";
   }
 
   requestSong(songIndex) {
@@ -136,7 +135,8 @@ class App extends Component {
       })
     });
   }
-
+  
+  //Also, at the moment this part of code not working (Code Works ahaed - yeah i sure hope it does)
   //TODO: Learn animation in react
   handleAnimationOn(index) {
    //TODO: test adding text instead of animation on the same classes
@@ -161,7 +161,8 @@ class App extends Component {
   analyzeEmotion() {
     //TODO: Find unicode range for english letters
     let arrOfWords = this.shortenSong();
-    console.log("trying");
+
+    //function to find actual percent based on the corelation between wordhits and the total amount of non-stop words in the song
     var getLyrDensity = (emotion) => {
       let totalWords = arrOfWords.length; 
       let wordHits = 0;
@@ -190,27 +191,28 @@ class App extends Component {
           wordHits++;
         }
       }
+      let percentEmo;
       if (wordHits > 0) {
-        let percentEmo = Math.ceil(wordHits / totalWords * 100);
-        let obj = this.state.songAnalysis
-        obj[emotion] = percentEmo;
-        console.log(percentEmo);
-        this.setState({
-          songAnalysis: obj,
-          shower: {display: "none"}
-        })
+        percentEmo = Math.ceil(wordHits / totalWords * 100);
+      } else {
+        percentEmo = 0;
       }
+      let obj = this.state.songAnalysis
+      obj[emotion] = percentEmo;
+      this.setState({
+        songAnalysis: obj,
+        shower: {display: "none"}
+      })
     }
 
     var calculateWieght = (emotion, total) => {
-      if (emotion === 0) {
-        return Math.round(1 / total * 100)
+      if (emotion === 0 || total === 0) {
+        return 0;
       } else {
         return Math.round(emotion / total * 100);
       }
     }
 
-    //TODO: separate putting in the values and creation of html to reduce the grand total to 100 and adjust to this value
     let analyzedEmotions = [];
     for (let key in this.state.selectedEmotions) {
       if (this.state.selectedEmotions[key]) analyzedEmotions.push(key);
@@ -220,8 +222,17 @@ class App extends Component {
       getLyrDensity(analyzedEmotions[i]);
     }
 
+    let obj = this.state.selectedEmotions;
+    
+    let firstTrue = (function() {
+      console.log(obj);
+      return Object.keys(obj).find(key => obj[key] === true);
+    })();
+
+    console.log(firstTrue);
+
     let overall = analyzedEmotions.reduce((prev, curr) => {
-      if (prev === "sadness") return this.state.songAnalysis[prev] + this.state.songAnalysis[curr];
+      if (prev === firstTrue) return this.state.songAnalysis[prev] + this.state.songAnalysis[curr];
       return prev + this.state.songAnalysis[curr];
     })
 
@@ -235,28 +246,22 @@ class App extends Component {
     document.getElementsByClassName("emotionTable")[0].innerHTML = html;
   }
 
-  //TODO: find a way to for the event to click one time ? rewrite
+  //TODO: handle Single emotion selected by implementing DB
   toggleEmotion(event, emo) {
     event.stopPropagation();
     if (this.state.selectedEmotions[emo]) {
-        console.log("Setting to true");
-        console.log(emo + " " + this.state.selectedEmotions[emo]);
         let obj = this.state.selectedEmotions;
         obj[emo] = false;
         this.setState({
           selectedEmotions: obj
       })
       } else {
-        console.log("Setting to false");
-        console.log(emo + " " + this.state.selectedEmotions[emo])
         let obj = this.state.selectedEmotions;
         obj[emo] = true;
-        console.log(obj[emo]);
         this.setState({
           selectedEmotions: obj
         });
       }
-      console.log(Object.values(this.state.selectedEmotions));
     }
 
   render() {
@@ -268,9 +273,9 @@ class App extends Component {
         //TODO: make factory to create components just by passing Emotion
         //TODO?: Add grid with react for Emotion and Slider
         textbox = <div>
-          <span className = 'emotionSwitch'> Sadness: <label className = 'switch' onClick = {(e) => {this.toggleEmotion(e, "sadness")}}><input type = 'checkbox'/><span className = 'slider'></span></label></span><br/>
-          <span className = 'emotionSwitch'> Anger: <label className = 'switch' onClick = {(e) => {this.toggleEmotion(e, "anger")}}><input type = 'checkbox'/><span className = 'slider'></span></label></span><br/>
-          <span className = 'emotionSwitch'> Fear: <label className = 'switch' onClick = {(e) => {this.toggleEmotion(e, "fear")}}><input type = 'checkbox'/><span className = 'slider'></span></label></span><br/>         
+          <span className = 'emotionSwitch'> Sadness: <label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, "sadness")}}/><span className = 'slider'></span></label></span><br/>
+          <span className = 'emotionSwitch'> Anger: <label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, "anger")}}/><span className = 'slider'></span></label></span><br/>
+          <span className = 'emotionSwitch'> Fear: <label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, "fear")}}/><span className = 'slider'></span></label></span><br/>         
         </div>;
       } else {
         //TODO: How to handle long statments in the lyrics? e.g. AJJ/The Beatles
