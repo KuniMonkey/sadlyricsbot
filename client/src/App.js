@@ -16,7 +16,7 @@ class App extends Component {
     this.state = {
       analyzeString: null,
       songName: '',
-      fetchedInfo: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      fetchedInfo: "default value",
       APIhits: false,
       token: 'F9Si6uQtnYbJ6qGSVpyB2WYEW2Ppc8-nx18EeYYleeGw-MFw2HqXu8VeAr_hXOYT',
       lexicon: null,
@@ -25,9 +25,9 @@ class App extends Component {
       shower: {display: "block"},
       songAnalysis: {},
       selectedEmotions: {
-        sadness :true,
-        anger: true,
-        fear: true
+        sadness :false,
+        anger: false,
+        fear: false
       }
     }
     this.handleChange = this.handleChange.bind(this);
@@ -235,13 +235,43 @@ class App extends Component {
     document.getElementsByClassName("emotionTable")[0].innerHTML = html;
   }
 
+  //TODO: find a way to for the event to click one time ? rewrite
+  toggleEmotion(event, emo) {
+    event.stopPropagation();
+    if (this.state.selectedEmotions[emo]) {
+        console.log("Setting to true");
+        console.log(emo + " " + this.state.selectedEmotions[emo]);
+        let obj = this.state.selectedEmotions;
+        obj[emo] = false;
+        this.setState({
+          selectedEmotions: obj
+      })
+      } else {
+        console.log("Setting to false");
+        console.log(emo + " " + this.state.selectedEmotions[emo])
+        let obj = this.state.selectedEmotions;
+        obj[emo] = true;
+        console.log(obj[emo]);
+        this.setState({
+          selectedEmotions: obj
+        });
+      }
+      console.log(Object.values(this.state.selectedEmotions));
+    }
+
   render() {
     
     let textbox;
-
+    
     if (!this.state.APIhits) {
       if (typeof this.state.fetchedInfo !== 'object') {
-        textbox = this.state.fetchedInfo;
+        //TODO: make factory to create components just by passing Emotion
+        //TODO?: Add grid with react for Emotion and Slider
+        textbox = <div>
+          <span className = 'emotionSwitch'> Sadness: <label className = 'switch' onClick = {(e) => {this.toggleEmotion(e, "sadness")}}><input type = 'checkbox'/><span className = 'slider'></span></label></span><br/>
+          <span className = 'emotionSwitch'> Anger: <label className = 'switch' onClick = {(e) => {this.toggleEmotion(e, "anger")}}><input type = 'checkbox'/><span className = 'slider'></span></label></span><br/>
+          <span className = 'emotionSwitch'> Fear: <label className = 'switch' onClick = {(e) => {this.toggleEmotion(e, "fear")}}><input type = 'checkbox'/><span className = 'slider'></span></label></span><br/>         
+        </div>;
       } else {
         //TODO: How to handle long statments in the lyrics? e.g. AJJ/The Beatles
         textbox = <div>
@@ -275,7 +305,11 @@ class App extends Component {
      <div className = "App">
      <div className = "header"><h1> SADLYRICSBOT </h1></div>
       <input  placeholder="Name of the song" onChange = {this.handleChange} style = {{margin: '10px'}} />
-      <button onClick = {this.handleClick} className = "btn btn-warning">
+      <button 
+        onClick = {() => {Object.values(this.state.selectedEmotions).indexOf(true) > -1 ?
+         this.handleClick() : 
+         alert("Please select at least one emotion")}} 
+        className = "btn btn-warning">
         Fetch
       </button>
       <div className = "emotionTable"></div>
