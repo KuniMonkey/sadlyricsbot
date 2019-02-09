@@ -258,20 +258,22 @@ class App extends Component {
       for (let i = 0; i <= analyzedEmotions.length - 1; i++) {
         html += "<div class = 'col-3' id = '" + analyzedEmotions[i] + "Table'>" + analyzedEmotions[i] + ":<br/>" + calculateWieght(this.state.songAnalysis[analyzedEmotions[i]], overall) + "%</div>"
         if (i === analyzedEmotions.length - 1) {
-          html += "</div></div>"
         }
       }
+      document.getElementsByClassName("emotionTable")[0].innerHTML = html;
     } else {
+      //TODO: Make the dissapearens of element and appearance of emoTable simultaneous
+      //TODO: fix bug with multiple requests for single
       let emotion = analyzedEmotions[0];
       let song = "placholder";
       let score = this.state.songAnalysis[analyzedEmotions[0]];
       this.checkDB(emotion, song, score).then(res => {
-        html += "<div class = 'col-3' id = '" + emotion + "Table'>" + emotion + ":<br/>" + res.score + "%</div></div></div>"
-      })
+        html += "<div class = 'col-3' id = '" + emotion + "Table'>" + emotion + ":<br/>" + res.score + "%</div>"
+        html += "</div></div>"
+        document.getElementsByClassName("emotionTable")[0].innerHTML = html
+      });
     }
 
-    //TODO: On hover the list of words 
-    document.getElementsByClassName("emotionTable")[0].innerHTML = html;
   }
 
   //TODO: handle Single emotion selected by implementing DB

@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post('/api/:action', (req, res) => {
-    if (req.param('action') === 'getSong') {
+    if (req.params.action === 'getSong') {
         request(req.body.LyrURL, (error, response, html) => {
             if (!error && response.statusCode == 200) {
                 const $ = cherrio.load(html);
@@ -27,7 +27,7 @@ app.post('/api/:action', (req, res) => {
             }
         })
     }
-    if (req.param('action') === 'CheckDB') {
+    if (req.params.action === 'CheckDB') {
         con.connect(function(err) {
             if (err) res.send({message: err});
         });
