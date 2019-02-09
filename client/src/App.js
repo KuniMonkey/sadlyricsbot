@@ -35,6 +35,7 @@ class App extends Component {
     this.analyzeEmotion = this.analyzeEmotion.bind(this);
     this.shortenSong = this.shortenSong.bind(this);
     this.toggleEmotion = this.toggleEmotion.bind(this);
+    this.checkDB = this.checkDB.bind(this);
   }
 
   componentWillMount() {
@@ -64,7 +65,22 @@ class App extends Component {
 
     if (response.status !== 200) console.log(value.message);
 
-    return value
+    return value;  
+  }
+
+  //For calculateWeight()
+  checkDB = async(emotion, song, score) => {
+    const response = await fetch('api/CheckDB', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({emo: emotion, title: song, percent: score})
+    });
+    const returned = await response.json();
+    if (response.status !== 200) console.log(returned.message);
+
+    console.log("in response the value is:" + returned.score);
+    
+    return returned;
   }
 
   handleChange(event) {
@@ -231,20 +247,29 @@ class App extends Component {
       return Object.keys(obj).find(key => obj[key] === true);
     })();
 
-    console.log(firstTrue);
-
     let overall = analyzedEmotions.reduce((prev, curr) => {
       if (prev === firstTrue) return this.state.songAnalysis[prev] + this.state.songAnalysis[curr];
       return prev + this.state.songAnalysis[curr];
     })
 
+    //TODO handle single emotion && more then 3
     let html = "<div class = 'container'><div class = 'row' id = 'emotionContainer'>";
-    for (let i = 0; i <= analyzedEmotions.length - 1; i++) {
-      html += "<div class = 'col-3' id = '" + analyzedEmotions[i] + "Table'>" + analyzedEmotions[i] + ":<br/>" + calculateWieght(this.state.songAnalysis[analyzedEmotions[i]], overall) + "%</div>"
-      if (i === analyzedEmotions.length - 1) {
-        html += "</div></div>"
+    if (analyzedEmotions.length !== 1) {
+      for (let i = 0; i <= analyzedEmotions.length - 1; i++) {
+        html += "<div class = 'col-3' id = '" + analyzedEmotions[i] + "Table'>" + analyzedEmotions[i] + ":<br/>" + calculateWieght(this.state.songAnalysis[analyzedEmotions[i]], overall) + "%</div>"
+        if (i === analyzedEmotions.length - 1) {
+          html += "</div></div>"
+        }
       }
+    } else {
+      let emotion = analyzedEmotions[0];
+      let song = "placholder";
+      let score = this.state.songAnalysis[analyzedEmotions[0]];
+      this.checkDB(emotion, song, score).then(res => {
+        html += "<div class = 'col-3' id = '" + emotion + "Table'>" + emotion + ":<br/>" + res.score + "%</div></div></div>"
+      })
     }
+
     //TODO: On hover the list of words 
     document.getElementsByClassName("emotionTable")[0].innerHTML = html;
   }
