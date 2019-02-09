@@ -34,6 +34,7 @@ class App extends Component {
     this.getSong = this.getSong.bind(this);
     this.analyzeEmotion = this.analyzeEmotion.bind(this);
     this.shortenSong = this.shortenSong.bind(this);
+    this.toggleEmotion = this.toggleEmotion.bind(this);
   }
 
   componentWillMount() {
@@ -80,8 +81,9 @@ class App extends Component {
       this.setState({
         shower: {display: "block"},
         APIhits: response.response.hits
-      }))
-    document.getElementsByClassName("emotionTable")[0].innerHTML = "";
+      }));
+      //TODO: Change sequence?
+      document.getElementsByClassName("emotionTable")[0].innerHTML = "";
   }
 
   requestSong(songIndex) {
@@ -136,7 +138,7 @@ class App extends Component {
     });
   }
   
-  //Also, at the moment this part of code not working (Code Works ahaed - yeah i sure hope it does)
+  //Also, at the moment this part of code is not working (Code Works ahaed - yeah i sure hope it does)
   //TODO: Learn animation in react
   handleAnimationOn(index) {
    //TODO: test adding text instead of animation on the same classes
@@ -243,12 +245,13 @@ class App extends Component {
         html += "</div></div>"
       }
     }
+    //TODO: On hover the list of words 
     document.getElementsByClassName("emotionTable")[0].innerHTML = html;
   }
 
   //TODO: handle Single emotion selected by implementing DB
   toggleEmotion(event, emo) {
-    event.stopPropagation();
+    console.log("I am one toggled motherfucker")
     if (this.state.selectedEmotions[emo]) {
         let obj = this.state.selectedEmotions;
         obj[emo] = false;
@@ -270,12 +273,12 @@ class App extends Component {
     
     if (!this.state.APIhits) {
       if (typeof this.state.fetchedInfo !== 'object') {
-        //TODO: make factory to create components just by passing Emotion
         //TODO?: Add grid with react for Emotion and Slider
         textbox = <div>
-          <span className = 'emotionSwitch'> Sadness: <label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, "sadness")}}/><span className = 'slider'></span></label></span><br/>
-          <span className = 'emotionSwitch'> Anger: <label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, "anger")}}/><span className = 'slider'></span></label></span><br/>
-          <span className = 'emotionSwitch'> Fear: <label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, "fear")}}/><span className = 'slider'></span></label></span><br/>         
+          {Object.keys(this.state.selectedEmotions).map((key, index) => {
+            let elemText = key.charAt(0).toUpperCase() + key.slice(1) + ": ";
+            return <span className = 'emotionSwitch' key = {index}> {elemText} <label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, key)}}/><span className = 'slider'></span></label><br/></span>
+          })}
         </div>;
       } else {
         //TODO: How to handle long statments in the lyrics? e.g. AJJ/The Beatles
