@@ -28,25 +28,27 @@ app.post('/api/:action', (req, res) => {
         })
     }
     if (req.params.action === 'CheckDB') {
+        console.log("before connect");
         con.connect(function(err) {
-            if (err) res.send({message: err});
-        });
-    
+        console.log("after connect");
+        if (err) res.send({message: err});
         const sql = "SELECT percent FROM maxemotion WHERE emotion='" + req.body.emo + "'";
         console.log(sql);
         con.query(sql, (err, result, fields) => {
 
             if (err) res.send({message: err});
 
+            console.log(result);
+    
             if (req.body.percent > result[0].percent) {
                 //add posting to Data Base
                 con.end();
                 res.send({score: "100"})
             } else {
                 let emoScore = (req.body.percent / result[0].percent) * 100;
-                con.end();
                 res.send({score: emoScore});
-            }
+                }
+            });
         });
     }
 });
