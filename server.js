@@ -31,10 +31,10 @@ app.post('/api/:action', (req, res) => {
         console.log("before connect");
         con.connect(function(err) {
         console.log("after connect");
-        if (err) res.send({message: err});
+        if (err) console.log(err);
         const sql = "SELECT percent FROM maxemotion WHERE emotion='" + req.body.emo + "'";
         console.log(sql);
-        con.query(sql, (err, result, fields) => {
+        con.query(sql, (err, result) => {
 
             if (err) res.send({message: err});
 
@@ -42,7 +42,6 @@ app.post('/api/:action', (req, res) => {
     
             if (req.body.percent > result[0].percent) {
                 //add posting to Data Base
-                con.end();
                 res.send({score: "100"})
             } else {
                 let emoScore = (req.body.percent / result[0].percent) * 100;
