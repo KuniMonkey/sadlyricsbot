@@ -166,6 +166,26 @@ body {
   border-color: #9933ff; 
 }
 
+#joyTable {
+  font-size: 20px;
+  margin: 10px;
+  padding: 20px;
+  color: #00ff00;
+  border: 5px solid;
+  border-radius: 25px;
+  border-color: #00ff00; 
+}
+
 #emotionContainer {
   justify-content: center;
+}
+
+#wrapper {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.mainPageHolder {
+  display: block;
+  width: 20%;
 }

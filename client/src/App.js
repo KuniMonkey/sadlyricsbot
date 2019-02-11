@@ -25,7 +25,8 @@ class App extends Component {
       selectedEmotions: {
         sadness :false,
         anger: false,
-        fear: false
+        fear: false,
+        joy: false
       }
     }
     this.handleChange = this.handleChange.bind(this);
@@ -187,20 +188,17 @@ class App extends Component {
       for (let i = 0; i <= totalWords - 1; i++) {
         let currWord = arrOfWords[i];
         if (currWord[currWord.length - 1] === "s") {
-          currWord = currWord.slice(0, -1);
-          if (this.state.lexicon[emotion].some(element => element === currWord)) {
+          if (this.state.lexicon[emotion].some(element => element === currWord.slice(0, -1))) {
             wordHits++;
             continue;
           }
         }
         if (currWord.slice(-2) === "ed") {
-          currWord = currWord.slice(0, -1); //for word w/o "d"
-          if (this.state.lexicon[emotion].some(element => element === currWord)) {
+          if (this.state.lexicon[emotion].some(element => element === currWord.slice(0, -1))) {
             wordHits++;
             continue;
           }
-          currWord = currWord.slice(0, -1); //for word w/o "ed"
-          if (this.state.lexicon[emotion].some(element => element === currWord)) {
+          if (this.state.lexicon[emotion].some(element => element === currWord.slice(0, -2))) {
             wordHits++;
             continue;
           }
@@ -257,9 +255,11 @@ class App extends Component {
     if (analyzedEmotions.length !== 1) {
       for (let i = 0; i <= analyzedEmotions.length - 1; i++) {
         html += "<div class = 'col-3' id = '" + analyzedEmotions[i] + "Table'>" + analyzedEmotions[i] + ":<br/>" + calculateWieght(this.state.songAnalysis[analyzedEmotions[i]], overall) + "%</div>"
-        if (i === analyzedEmotions.length - 1) {
+        if ((i + 1) % 3 === 0) {
+          html += "</div><div class = 'row' id = 'emotionContainer'>";
         }
       }
+      html += "</div></div>";
       document.getElementsByClassName("emotionTable")[0].innerHTML = html;
     } else {
       //TODO: Make the dissapearens of element and appearance of emoTable simultaneous
@@ -304,7 +304,7 @@ class App extends Component {
         textbox = <div>
           {Object.keys(this.state.selectedEmotions).map((key, index) => {
             let elemText = key.charAt(0).toUpperCase() + key.slice(1) + ": ";
-            return <span className = 'emotionSwitch' key = {index}> {elemText} <label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, key)}}/><span className = 'slider'></span></label><br/></span>
+            return <div id = 'wrapper'><div className = 'mainPageHolder'>{elemText}</div><div className = 'mainPageHolder'><span className = 'emotionSwitch' key = {index}><label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, key)}}/><span className = 'slider'></span></label><br/></span></div></div>
           })}
         </div>;
       } else {
