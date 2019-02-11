@@ -34,6 +34,8 @@ class App extends Component {
     this.getSong = this.getSong.bind(this);
     this.analyzeEmotion = this.analyzeEmotion.bind(this);
     this.shortenSong = this.shortenSong.bind(this);
+    this.toggleEmotion = this.toggleEmotion.bind(this);
+    this.checkDB = this.checkDB.bind(this);
   }
 
   componentWillMount() {
@@ -63,7 +65,22 @@ class App extends Component {
 
     if (response.status !== 200) console.log(value.message);
 
-    return value
+    return value;  
+  }
+
+  //For calculateWeight()
+  checkDB = async(emotion, song, score) => {
+    const response = await fetch('api/CheckDB', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({emo: emotion, title: song, percent: score})
+    });
+    const returned = await response.json();
+    if (response.status !== 200) console.log(returned.message);
+
+    console.log("in response the value is:" + returned.score);
+    
+    return returned;
   }
 
   handleChange(event) {
@@ -80,8 +97,9 @@ class App extends Component {
       this.setState({
         shower: {display: "block"},
         APIhits: response.response.hits
-      }))
-    document.getElementsByClassName("emotionTable")[0].innerHTML = "";
+      }));
+      //TODO: Change sequence?
+      document.getElementsByClassName("emotionTable")[0].innerHTML = "";
   }
 
   requestSong(songIndex) {
@@ -136,7 +154,7 @@ class App extends Component {
     });
   }
   
-  //Also, at the moment this part of code not working (Code Works ahaed - yeah i sure hope it does)
+  //Also, at the moment this part of code is not working (Code Works ahaed - yeah i sure hope it does)
   //TODO: Learn animation in react
   handleAnimationOn(index) {
    //TODO: test adding text instead of animation on the same classes
@@ -229,26 +247,38 @@ class App extends Component {
       return Object.keys(obj).find(key => obj[key] === true);
     })();
 
-    console.log(firstTrue);
-
     let overall = analyzedEmotions.reduce((prev, curr) => {
       if (prev === firstTrue) return this.state.songAnalysis[prev] + this.state.songAnalysis[curr];
       return prev + this.state.songAnalysis[curr];
     })
 
+    //TODO handle single emotion && more then 3
     let html = "<div class = 'container'><div class = 'row' id = 'emotionContainer'>";
-    for (let i = 0; i <= analyzedEmotions.length - 1; i++) {
-      html += "<div class = 'col-3' id = '" + analyzedEmotions[i] + "Table'>" + analyzedEmotions[i] + ":<br/>" + calculateWieght(this.state.songAnalysis[analyzedEmotions[i]], overall) + "%</div>"
-      if (i === analyzedEmotions.length - 1) {
-        html += "</div></div>"
+    if (analyzedEmotions.length !== 1) {
+      for (let i = 0; i <= analyzedEmotions.length - 1; i++) {
+        html += "<div class = 'col-3' id = '" + analyzedEmotions[i] + "Table'>" + analyzedEmotions[i] + ":<br/>" + calculateWieght(this.state.songAnalysis[analyzedEmotions[i]], overall) + "%</div>"
+        if (i === analyzedEmotions.length - 1) {
+        }
       }
+      document.getElementsByClassName("emotionTable")[0].innerHTML = html;
+    } else {
+      //TODO: Make the dissapearens of element and appearance of emoTable simultaneous
+      //TODO: fix bug with multiple requests for single
+      let emotion = analyzedEmotions[0];
+      let song = "placholder";
+      let score = this.state.songAnalysis[analyzedEmotions[0]];
+      this.checkDB(emotion, song, score).then(res => {
+        html += "<div class = 'col-3' id = '" + emotion + "Table'>" + emotion + ":<br/>" + res.score + "%</div>"
+        html += "</div></div>"
+        document.getElementsByClassName("emotionTable")[0].innerHTML = html
+      });
     }
-    document.getElementsByClassName("emotionTable")[0].innerHTML = html;
+
   }
 
   //TODO: handle Single emotion selected by implementing DB
   toggleEmotion(event, emo) {
-    event.stopPropagation();
+    console.log("I am one toggled motherfucker")
     if (this.state.selectedEmotions[emo]) {
         let obj = this.state.selectedEmotions;
         obj[emo] = false;
@@ -270,12 +300,12 @@ class App extends Component {
     
     if (!this.state.APIhits) {
       if (typeof this.state.fetchedInfo !== 'object') {
-        //TODO: make factory to create components just by passing Emotion
         //TODO?: Add grid with react for Emotion and Slider
         textbox = <div>
-          <span className = 'emotionSwitch'> Sadness: <label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, "sadness")}}/><span className = 'slider'></span></label></span><br/>
-          <span className = 'emotionSwitch'> Anger: <label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, "anger")}}/><span className = 'slider'></span></label></span><br/>
-          <span className = 'emotionSwitch'> Fear: <label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, "fear")}}/><span className = 'slider'></span></label></span><br/>         
+          {Object.keys(this.state.selectedEmotions).map((key, index) => {
+            let elemText = key.charAt(0).toUpperCase() + key.slice(1) + ": ";
+            return <span className = 'emotionSwitch' key = {index}> {elemText} <label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, key)}}/><span className = 'slider'></span></label><br/></span>
+          })}
         </div>;
       } else {
         //TODO: How to handle long statments in the lyrics? e.g. AJJ/The Beatles
