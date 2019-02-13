@@ -19,7 +19,7 @@ class App extends Component {
       token: 'F9Si6uQtnYbJ6qGSVpyB2WYEW2Ppc8-nx18EeYYleeGw-MFw2HqXu8VeAr_hXOYT',
       lexicon: null,
       songDuration: null, //do I actually need it?
-      animationFrame: null,
+      animationFrame: false,
       shower: {display: "block"},
       songAnalysis: {},
       selectedEmotions: {
@@ -69,7 +69,7 @@ class App extends Component {
     return value;  
   }
 
-  //For calculateWeight()
+  //For this.calculateWeight()
   checkDB = async(emotion, song, score) => {
     const response = await fetch('api/CheckDB', {
       method: 'POST',
@@ -77,9 +77,7 @@ class App extends Component {
       body: JSON.stringify({emo: emotion, title: song, percent: score})
     });
     const returned = await response.json();
-    if (response.status !== 200) console.log(returned.message);
-
-    console.log("in response the value is:" + returned.score);
+    if (response.status !== 200) console.log("Coulnd recive the data");
     
     return returned;
   }
@@ -107,6 +105,7 @@ class App extends Component {
     const songWebPage = "https://genius.com" + this.state.APIhits[songIndex].result.path;
     this.handleAnimationOn(songIndex)
     this.getSong(songWebPage);
+    //TODO: possibly remove next to commands
     const LastAPI_URL = 'http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=5bed0a607f046f1ad1870be23ace9cf7&artist=' + encodeURIComponent(this.state.APIhits[songIndex].result.primary_artist.name) + '&track=' + encodeURIComponent(this.state.APIhits[songIndex].result.title)  + '&format=json';
     fetch(LastAPI_URL).then(res => res.json()).then(data => {
       if (data.hasOwnProperty('track')) {
@@ -162,11 +161,17 @@ class App extends Component {
     const animatedFrame = document.getElementsByClassName("itemOnTheList");
     animatedFrame[index].classList.add('loadingAnimation');
     console.dir(animatedFrame[index]);
+    this.setState({
+      animationFrame: true
+    })
   }
 
   handleAnimationOff(index) {
     const animatedFrame = document.getElementsByClassName("itemOnTheList");
-    animatedFrame[index].classList.remove('loadingAnimation')
+    animatedFrame[index].classList.remove('loadingAnimation');
+    this.setState({
+      animationFrame: false
+    })
   }
 
   shortenSong() {
@@ -217,7 +222,6 @@ class App extends Component {
       obj[emotion] = percentEmo;
       this.setState({
         songAnalysis: obj,
-        shower: {display: "none"}
       })
     }
 
@@ -272,13 +276,15 @@ class App extends Component {
         html += "</div></div>"
         document.getElementsByClassName("emotionTable")[0].innerHTML = html
       });
+      this.setState({
+        shower: {display: "none"}
+      })
     }
 
   }
 
   //TODO: handle Single emotion selected by implementing DB
   toggleEmotion(event, emo) {
-    console.log("I am one toggled motherfucker")
     if (this.state.selectedEmotions[emo]) {
         let obj = this.state.selectedEmotions;
         obj[emo] = false;
@@ -300,7 +306,6 @@ class App extends Component {
     
     if (!this.state.APIhits) {
       if (typeof this.state.fetchedInfo !== 'object') {
-        //TODO?: Add grid with react for Emotion and Slider
         textbox = <div>
           {Object.keys(this.state.selectedEmotions).map((key, index) => {
             let elemText = key.charAt(0).toUpperCase() + key.slice(1) + ": ";
@@ -308,7 +313,6 @@ class App extends Component {
           })}
         </div>;
       } else {
-        //TODO: How to handle long statments in the lyrics? e.g. AJJ/The Beatles
         textbox = <div>
           <button style = {{display: 'block', margin: '0 auto'}} onClick = {() => {this.analyzeEmotion()}} className = "btn btn-primary">Analyze the Sadness</button>
           <br />
