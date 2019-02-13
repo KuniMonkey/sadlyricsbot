@@ -36,12 +36,14 @@ app.post('/api/:action', (req, res) => {
         console.log(sql);
         con.query(sql, (err, result) => {
 
-            if (err) res.send({message: err});
-
-            console.log(result);
+            if (err) console.log(err);
     
             if (req.body.percent > result[0].percent) {
                 //add posting to Data Base
+                let upQuery = "UPDATE maxemotion SET percent = '" + req.body.percent + "'WHERE emotion = '" + req.body.emo + "'" ;
+                con.query(upQuery, (err, result) => {
+                    if (err) console.log(err);
+                })
                 res.send({score: "100"})
             } else {
                 let emoScore = (req.body.percent / result[0].percent) * 100;
