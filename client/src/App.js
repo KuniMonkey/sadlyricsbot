@@ -4,9 +4,11 @@ import { relative } from 'path';
 
 //TODO: ResetButton on list of emotions page
 //TODO: consider adding the weight of the lyrics for song (based on the this.state.songDuration)
-//TODO: The title of the song on emotions page
 //TODO: create switch on the frontpage to select all emotions + buttons?
 //TODO: create a graph based on selected emotions and switch between graph and table view
+//TODO: positive/negative button 
+//TODO: on hover a list of words
+//TODO: post to twitter button
 
 class App extends Component {
   constructor(props) {
@@ -16,6 +18,7 @@ class App extends Component {
       songName: '',
       fetchedInfo: "default value",
       APIhits: false,
+      ReqSong: null, 
       token: 'F9Si6uQtnYbJ6qGSVpyB2WYEW2Ppc8-nx18EeYYleeGw-MFw2HqXu8VeAr_hXOYT',
       lexicon: null,
       songDuration: null, //do I actually need it?
@@ -26,7 +29,8 @@ class App extends Component {
         sadness :false,
         anger: false,
         fear: false,
-        joy: false
+        joy: false,
+        disgust: false
       }
     }
     this.handleChange = this.handleChange.bind(this);
@@ -110,7 +114,8 @@ class App extends Component {
     fetch(LastAPI_URL).then(res => res.json()).then(data => {
       if (data.hasOwnProperty('track')) {
         this.setState({
-          songDuration: Number(data.track.duration) / 1000
+          songDuration: Number(data.track.duration) / 1000,
+          songName: this.state.APIhits[songIndex].result.title
         })
       } else {
         this.setState({
@@ -256,6 +261,7 @@ class App extends Component {
 
     //TODO handle single emotion && more then 3
     let html = "<div class = 'container'><div class = 'row' id = 'emotionContainer'>";
+    let title = "<div style = 'font-size: 28px; color: #ffd633'>" + this.state.songName + "</div>";
     if (analyzedEmotions.length !== 1) {
       for (let i = 0; i <= analyzedEmotions.length - 1; i++) {
         html += "<div class = 'col-3' id = '" + analyzedEmotions[i] + "Table'>" + analyzedEmotions[i] + ":<br/>" + calculateWieght(this.state.songAnalysis[analyzedEmotions[i]], overall) + "%</div>"
@@ -264,7 +270,7 @@ class App extends Component {
         }
       }
       html += "</div></div>";
-      document.getElementsByClassName("emotionTable")[0].innerHTML = html;
+      document.getElementsByClassName("emotionTable")[0].innerHTML = title.concat(html);
     } else {
       //TODO: Make the dissapearens of element and appearance of emoTable simultaneous
       //TODO: fix bug with multiple requests for single
@@ -274,7 +280,7 @@ class App extends Component {
       this.checkDB(emotion, song, score).then(res => {
         html += "<div class = 'col-6' id = '" + emotion + "Table' style = 'font-size: 30px;'>" + emotion + ":<br/>" + Math.round(res.score) + "%</div>"
         html += "</div></div>"
-        document.getElementsByClassName("emotionTable")[0].innerHTML = html
+        document.getElementsByClassName("emotionTable")[0].innerHTML = title.concat(html);
       });
     }
     this.setState({
