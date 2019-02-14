@@ -272,15 +272,14 @@ class App extends Component {
       let song = "placholder";
       let score = this.state.songAnalysis[analyzedEmotions[0]];
       this.checkDB(emotion, song, score).then(res => {
-        html += "<div class = 'col-3' id = '" + emotion + "Table'>" + emotion + ":<br/>" + res.score + "%</div>"
+        html += "<div class = 'col-6' id = '" + emotion + "Table' style = 'font-size: 30px;'>" + emotion + ":<br/>" + Math.round(res.score) + "%</div>"
         html += "</div></div>"
         document.getElementsByClassName("emotionTable")[0].innerHTML = html
       });
-      this.setState({
-        shower: {display: "none"}
-      })
     }
-
+    this.setState({
+      shower: {display: "none"}
+    })
   }
 
   //TODO: handle Single emotion selected by implementing DB
@@ -309,7 +308,7 @@ class App extends Component {
         textbox = <div>
           {Object.keys(this.state.selectedEmotions).map((key, index) => {
             let elemText = key.charAt(0).toUpperCase() + key.slice(1) + ": ";
-            return <div id = 'wrapper'><div className = 'mainPageHolder'>{elemText}</div><div className = 'mainPageHolder'><span className = 'emotionSwitch' key = {index}><label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, key)}}/><span className = 'slider'></span></label><br/></span></div></div>
+            return <div id = 'wrapper' key = {index}><div className = 'mainPageHolder'>{elemText}</div><div className = 'mainPageHolder'><span className = 'emotionSwitch'><label className = 'switch'><input type = 'checkbox' onClick = {(e) => {this.toggleEmotion(e, key)}}/><span className = 'slider'></span></label><br/></span></div></div>
           })}
         </div>;
       } else {
@@ -340,6 +339,7 @@ class App extends Component {
       });
     } 
 
+    //TODO: method for reset button once I have the state structure optimized
     return (
      <div className = "App">
      <div className = "header"><h1> SADLYRICSBOT </h1></div>
@@ -353,6 +353,8 @@ class App extends Component {
       </button>
       <div className = "emotionTable"></div>
       <p /><h4 className = "lyrHolder" style = {this.state.shower}>{textbox}</h4>
+      <br/>
+      <button className = "btn btn-warning" style = {{opacity: 0.2}}>Resest</button>
      </div>
     );
   }

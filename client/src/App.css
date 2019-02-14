@@ -69,6 +69,7 @@ input:checked + .slider:before {
 
 .btn-warning {
   background: #ffd633;
+  margin-top: -4px;
 }
 
 .btn-primary {
